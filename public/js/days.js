@@ -11,7 +11,7 @@ var daysModule = (function(){
     var dayNum = days.length + 1;
     $.ajax({
         method: 'POST',
-        url: '/days/api/'+dayNum,
+        url: '/api/days/'+dayNum,
         success: function (responseData) {
           console.log("Day ", dayNum, " was added");
           switchDay(dayNum);
@@ -19,17 +19,10 @@ var daysModule = (function(){
           getDays()
         },
         error: function (errorObj) {
-          console.log(errorObj);
-          // return errorObj
+          console.error(errorObj);
         }
     });
-
-    // days.push({
-    //   hotels: [],
-    //   restaurants: [],
-    //   activities: []
-    // });
-
+    console.log("didn\'t work");
   }
 
   function switchDay (index) {
@@ -116,16 +109,16 @@ var daysModule = (function(){
             addDay();
           }
           else {
-            days = responseData
+            days = responseData;
             currentDay = responseData[0];
             cb();
           }
-          console.log("response date: ", responseData);
+          console.log("response data: ", responseData);
           console.log("typeof response date: ", typeof responseData);
            // cb();
         },
         error: function (errorObj) {
-            new Error(errorObj);
+            console.error(errorObj);
         }
     });
   }
