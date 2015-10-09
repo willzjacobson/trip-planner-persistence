@@ -22,19 +22,67 @@ $(document).ready(function() {
     return selected;
   }
 
+  // adding an attraction
   $('#attraction-select').on('click', 'button', function() {
     var $button = $(this),
         type = $button.data('type'),
         attractions = attractionsByType[type],
         id = $button.siblings('select').val();
-    daysModule.addAttraction(findByTypeAndId(type, id));
+        var currentDayNum = +$(".current-day").text()
+        $.ajax({
+            method: 'PUT',
+            url: '/api/days/' + currentDayNum + '/' + type + '/' + id,
+            success: function (updatedDay) {
+              daysModule.updateDay(currentDayNum-1,updatedDay);
+              // if (type === "hotels"){
+              //   updatedDay.hotel.type = "hotel";
+              //   daysModule.addAttraction(updatedDay.hotel);
+              // }
+              // else {
+              //   updatedDay[type].forEach(function(attraction){
+              //     if (attraction._id === id){
+              //       attraction.type = type;
+              //       daysModule.addAttraction(attraction);
+              //     }
+              //   })
+              // }
+            },
+            error: function (errorObj) {
+              console.error(errorObj);
+            }
+        });
   });
 
   $('#itinerary').on('click', 'button', function() {
     var $button = $(this),
         type = $button.data('type'),
         id = $button.data('id');
-    daysModule.removeAttraction(findByTypeAndId(type, id));
+
+        var currentDayNum = +$(".current-day").text()
+
+        $.ajax({
+            method: 'DELETE',
+            url: '/api/days/' + currentDayNum + '/' + type + '/' + id,
+            success: function (updatedDay) {
+              daysModule.updateDay(currentDayNum-1,updatedDay);
+              // if (type === "hotels"){
+              //   updatedDay.hotel.type = "hotel";
+              //   daysModule.addAttraction(updatedDay.hotel);
+              // }
+              // else {
+              //   updatedDay[type].forEach(function(attraction){
+              //     if (attraction._id === id){
+              //       attraction.type = type;
+              //       daysModule.addAttraction(attraction);
+              //     }
+              //   })
+              // }
+            },
+            error: function (errorObj) {
+              console.error(errorObj);
+            }
+        });        
+    // daysModule.removeAttraction(findByTypeAndId(type, id));
   });
 
 });
