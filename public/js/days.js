@@ -4,25 +4,37 @@
 var daysModule = (function(){
 
   var exports = {},
-      days = [{
-        hotels:      [],
-        restaurants: [],
-        activities:  []
-      }],
+      days = [],
       currentDay = days[0];
 
   function addDay () {
-    days.push({
-      hotels: [],
-      restaurants: [],
-      activities: []
+    var dayNum = days.length + 1;
+    $.ajax({
+        method: 'POST',
+        url: '/days/api/'+dayNum,
+        success: function (responseData) {
+          console.log("Day ", dayNum, " was added");
+          switchDay(dayNum);
+          renderDayButtons();
+          getDays()
+        },
+        error: function (errorObj) {
+          console.log(errorObj);
+          // return errorObj
+        }
     });
-    renderDayButtons();
-    switchDay(days.length - 1);
+
+    // days.push({
+    //   hotels: [],
+    //   restaurants: [],
+    //   activities: []
+    // });
+
   }
 
   function switchDay (index) {
     var $title = $('#day-title');
+    console.log("days in switchDay is ", days);
     if (index >= days.length) index = days.length - 1;
     $title.children('span').remove();
     $title.prepend('<span>Day ' + (index + 1) + '</span>');
@@ -82,7 +94,10 @@ var daysModule = (function(){
   }
 
   $(document).ready(function(){
-    switchDay(0);
+    getDays(function(){
+      switchDay(0);
+    });
+    // switchDay(0);
     $('.day-buttons').on('click', '.new-day-btn', addDay);
     $('.day-buttons').on('click', 'button:not(.new-day-btn)', function() {
       switchDay($(this).index());
@@ -91,5 +106,28 @@ var daysModule = (function(){
   });
 
   return exports;
+
+  function getDays(cb) {
+    $.ajax({
+        method: 'GET',
+        url: '/api/days',
+        success: function (responseData) {
+          if (responseData.length === 0){
+            addDay();
+          }
+          else {
+            days = responseData
+            currentDay = responseData[0];
+            cb();
+          }
+          console.log("response date: ", responseData);
+          console.log("typeof response date: ", typeof responseData);
+           // cb();
+        },
+        error: function (errorObj) {
+            new Error(errorObj);
+        }
+    });
+  }
 
 }());

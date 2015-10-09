@@ -20,4 +20,6 @@ router.get('/', function(req, res) {
     })
 })
 
+router.use("/api/days", require('./api/days'));
+
 module.exports = router;
