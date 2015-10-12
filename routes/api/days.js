@@ -36,9 +36,25 @@ router.post('/:dayNum', function(req,res){
 })
 
 // get delete given day
+// ADD DAY NUMBER UPDATE
 router.delete('/:dayNum', function(req,res){
-  Day.remove({number: req.params.dayNum}).then(function(){
-    res.end();
+  var dayNum = req.params.dayNum
+  Day.remove({number: dayNum})
+  .then(
+    function(){
+    Day.find({$where: "this.number > " + dayNum}).exec()
+    .then(function(days){
+      if (days.length === 0){
+        res.end();
+      }
+      Promise.all(days.map(function(day){
+        day.number--;
+        return day.save();
+      }))
+      .then(function(){
+        res.end();
+      })
+    })
   });
 })
 
@@ -71,11 +87,8 @@ router.delete('/:dayNum/:type/:id', function(req,res){
   .then(function(day) {
     var plansOfThisType = day[req.params.type];    
     if (req.params.type == "hotels") {
-      // console.log("")
-      // console.log("I am deleting this fucking hotel", day.hotel);
-      delete day.hotel;
-      // console.log("I hope I deleted this fucking hotel", day.hotel);
-
+      day.hotel = null;
+      console.log("During delete",day);
     }
     else {
       var indexOfPlan = plansOfThisType.indexOf(req.params.id);

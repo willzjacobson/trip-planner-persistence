@@ -9,8 +9,6 @@ var daysModule = (function(){
 
   function addDay () {
     var dayNum = days.length + 1;
-    console.log("days in addDay", days);
-    console.log("dayNum in addDay", dayNum);
     $.ajax({
         method: 'POST',
         url: '/api/days/'+dayNum,
@@ -27,21 +25,44 @@ var daysModule = (function(){
   }
 
   function switchDay (index) {
+    index = Number(index);
     var $title = $('#day-title');
     if (index >= days.length) index = days.length - 1;
     $title.children('span').remove();
     $title.prepend('<span>Day ' + (index+1) + '</span>');
     currentDay = days[index];
-    console.log("Current day in switchDay" , currentDay);
     renderDay();
     renderDayButtons();
   }
 
+  // do ajax call to update DB
+  // then call getDays with a switchDay callback for a given day
   function removeCurrentDay () {
-    if (days.length === 1) return;
-    var index = days.indexOf(currentDay);
-    days.splice(index, 1);
-    switchDay(index);
+    var curDayNum = +($(".current-day").text());
+    // if (days.length === 1) return;
+    $.ajax({
+        method: 'DELETE',
+        url: '/api/days/' +curDayNum,
+        success: function (responseData) {
+          if (curDayNum === days.length){
+            curDayNum = curDayNum-1;
+            curDayNum = curDayNum || 1;
+          }
+          getDays(function(){
+            switchDay(curDayNum-1);
+          })
+        },
+        error: function (errorObj) {
+          getDays(function(){
+            switchDay(0);
+          })
+          console.error(errorObj);
+        }
+    });
+
+    // var index = days.indexOf(currentDay);
+    // days.splice(index, 1);
+    // switchDay(index);
   }
 
   function renderDayButtons () {
@@ -91,12 +112,12 @@ var daysModule = (function(){
         $list.empty();
         if (type === 'hotel') {
           var $list = $('#itinerary ul[data-type="' + type + 's"]');
-          $list.empty();          
-          day[type].type = type + "s";
-
-          $list.append(itineraryHTML(day[type]));
-
-          mapModule.drawAttraction(day[type]);
+          $list.empty(); 
+          if (day[type] != null){
+            day[type].type = type + "s";
+            $list.append(itineraryHTML(day[type]));   
+            mapModule.drawAttraction(day[type]);
+          }         
         } 
         else {
           day[type].forEach(function(attraction){
@@ -133,6 +154,8 @@ var daysModule = (function(){
         url: '/api/days',
         success: function (responseData) {
           if (responseData.length === 0){
+            days = responseData;
+            currentDay = responseData[0];
             addDay();
           }
           else {
@@ -140,7 +163,6 @@ var daysModule = (function(){
             currentDay = responseData[0];
             if (cb) cb();
           }
-           // cb();
         },
         error: function (errorObj) {
             console.error(errorObj);

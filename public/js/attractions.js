@@ -9,6 +9,7 @@ $(document).ready(function() {
     activities:  all_activities
   };
 
+  // no longer needed?
   function findByTypeAndId (type, id) {
     var attractions = attractionsByType[type],
         selected;
@@ -34,18 +35,6 @@ $(document).ready(function() {
             url: '/api/days/' + currentDayNum + '/' + type + '/' + id,
             success: function (updatedDay) {
               daysModule.updateDay(currentDayNum-1,updatedDay);
-              // if (type === "hotels"){
-              //   updatedDay.hotel.type = "hotel";
-              //   daysModule.addAttraction(updatedDay.hotel);
-              // }
-              // else {
-              //   updatedDay[type].forEach(function(attraction){
-              //     if (attraction._id === id){
-              //       attraction.type = type;
-              //       daysModule.addAttraction(attraction);
-              //     }
-              //   })
-              // }
             },
             error: function (errorObj) {
               console.error(errorObj);
